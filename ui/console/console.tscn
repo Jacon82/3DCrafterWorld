@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://3w1l0dbgxvfy"]
+
+[ext_resource type="Script" uid="uid://w7gikba2fge1" path="res://ui/console/console.gd" id="1_634rs"]
+
+[node name="Console" type="CanvasLayer" unique_id=267814207]
+layer = 100
+script = ExtResource("1_634rs")
+
+[node name="ConsoleUI" type="Control" parent="." unique_id=963554268]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="ConsoleUI" unique_id=1042223364]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 300.0
+grow_horizontal = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ConsoleUI/PanelContainer" unique_id=765677422]
+layout_mode = 2
+
+[node name="OutputHistory" type="RichTextLabel" parent="ConsoleUI/PanelContainer/VBoxContainer" unique_id=372445146]
+layout_mode = 2
+size_flags_vertical = 3
+scroll_following = true
+
+[node name="CommandInput" type="LineEdit" parent="ConsoleUI/PanelContainer/VBoxContainer" unique_id=685038774]
+layout_mode = 2

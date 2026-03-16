@@ -22,10 +22,15 @@ var camera_pitch: float = deg_to_rad(-25.0)
 @onready var interact_raycast = $CameraPivot/SpringArm3D/Camera3D/InteractRaycast
 
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	add_to_group("player")
+	
+	if not Console.console_ui.visible:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
 	camera_pivot.rotation.x = camera_pitch
 	spring_arm.spring_length = min_camera_zoom
-	print("[Player] Valheim-style movement initialized. Mesh rotation decoupled.")
+	interact_raycast.add_exception(self)
+	print("[Player] Ready.")
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -70,9 +75,15 @@ func _physics_process(delta):
 
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	
-	var look_direction = camera_pivot.global_transform.basis
-	var direction = (look_direction * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	direction.y = 0 
+	var fwd_vector = -camera_pivot.global_transform.basis.z
+	var right_vector = camera_pivot.global_transform.basis.x
+	
+	fwd_vector.y = 0
+	right_vector.y = 0
+	fwd_vector = fwd_vector.normalized()
+	right_vector = right_vector.normalized()
+	
+	var direction = (fwd_vector * -input_dir.y + right_vector * input_dir.x).normalized()
 	
 	if direction:
 		velocity.x = direction.x * SPEED
@@ -84,23 +95,15 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
-	var collision_occurred = move_and_slide()
-	
-	if collision_occurred and get_slide_collision_count() > 0:
-		for i in range(get_slide_collision_count()):
-			var collision = get_slide_collision(i)
-			var collider = collision.get_collider()
-			if collider == null:
-				push_error("[Player] Collision detected but collider is null.")
+	move_and_slide()
 
 func _try_interact():
 	interact_raycast.force_raycast_update()
-	
 	if interact_raycast.is_colliding():
 		var target = interact_raycast.get_collider()
 		if target == null: return
-		var distance_to_target = global_position.distance_to(target.global_position)
-		if distance_to_target <= MAX_INTERACT_DISTANCE:
+		var dist = global_position.distance_to(target.global_position)
+		if dist <= MAX_INTERACT_DISTANCE:
 			print("[Player] Interaction SUCCESS with: ", target.name)
 		else:
-			print("[Player] Interaction FAILED. Distance: ", distance_to_target)
+			print("[Player] Interaction FAILED. Distance: ", dist)
